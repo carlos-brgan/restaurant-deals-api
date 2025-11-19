@@ -32,8 +32,13 @@ public class ChallengeMapper {
     public static Restaurant toRestaurant(RestaurantDTO dto) {
 
         // Parse opening and closing times
-        LocalTime open  = TimeParser.parse(dto.openRaw());
-        LocalTime close = TimeParser.parse(dto.closeRaw());
+        LocalTime open  = (dto.openRaw()  == null || dto.openRaw().isBlank())
+                ? null
+                : TimeParser.parse(dto.openRaw());
+
+        LocalTime close = (dto.closeRaw() == null || dto.closeRaw().isBlank())
+                ? null
+                : TimeParser.parse(dto.closeRaw());
 
         // Map deals from DTO to domain objects
         List<Deal> deals = dto.deals().stream()
