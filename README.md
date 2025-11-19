@@ -520,3 +520,48 @@ The workflow runs:
 - JaCoCo test coverage
 - Uploads reports as artifacts
 
+# 14. Task 2 — Peak Time Window (Overall Explanation)
+
+The goal of Task 2 is to compute the continuous period of the day during which the highest number of restaurant deals are active at the same time. Unlike Task 1, which answers “what is active right now?”, Task 2 answers a global question:
+
+“When is activity at its highest across the entire dataset?”
+
+This is more complex than it appears because deal availability in the JSON feed is inconsistent. Deals may define:
+- start / end
+- or open / close
+- or neither (inherit restaurant hours)
+- or be missing entirely (treated as always-active)
+- or wrap past midnight (20:00 → 02:00)
+- and end-times are exclusive
+
+Because of these variations, determining the true overlap requires normalising all deal windows into a consistent format.
+
+To solve this efficiently and deterministically, the API uses a sweep-line algorithm, a classic technique for interval overlap problems:
+1.	Convert each deal into two events:
+- (start, +1) → deal becomes active
+- (end, -1) → deal becomes inactive
+2. Sort all events by time.
+3. Sweep through the timeline once, keeping a running count of active deals.
+4. Whenever this count reaches the current maximum, record the start of a new peak window.
+5. The next event’s timestamp becomes the end of that window.
+
+This handles all edge cases:
+- wrap-around windows
+- missing times
+- cascading overlaps
+- exclusive end times
+- multiple windows with the same maximum
+
+If more than one interval shares the same peak overlap, the algorithm returns the most recent interval where that peak occurs, producing stable and intuitive results.
+
+The final output is a simple JSON object:
+
+```json
+{
+  "peakTimeStart": "17:00",
+  "peakTimeEnd": "21:00",
+  "count": 12
+}
+```
+
+representing the time window during which deal activity is at its highest.
