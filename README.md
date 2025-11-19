@@ -34,8 +34,9 @@ Key features:
 
 ---
 
-# 2. Architecture Summary
+# 2. Architecture
 
+## Summary
 **Tech stack:**
 - Java 21
 - Spring Boot (Web + Data JPA)
@@ -47,6 +48,149 @@ Key features:
 - Strong domain modelling
 - Clean separation of loader, domain, service and API layers
 - TDD with unit tests for parsing, normalisation, filtering and peak calculations
+
+
+## Architecture
+
+This project is a small Spring Boot 3 REST API that exposes restaurant deals from a static JSON feed,
+loads them into an in-memory database, and provides query + peak-time calculations.
+
+It follows a simple layered architecture:
+
+- **API layer** (`api`) – HTTP controllers and response DTOs
+- **Service layer** (`service`) – business logic, filtering and peak time calculations
+- **Domain layer** (`domain`) – core domain models used inside the service layer
+- **Persistence layer** (`persistence`, `repository`) – JPA entities and Spring Data repositories
+- **Infrastructure / config** (`config`, `loader`) – application wiring and data bootstrapping
+
+### Project layout
+
+From `src/main/java/au/com/eatclub/challenge`:
+
+```text
+challenge
+├── RestaurantDealsApplication.java      # Spring Boot entry point
+├── api
+│   ├── DealController.java              # REST endpoints for deals + peak time
+│   ├── DealResponse.java                # DTO returned by /deals API
+│   ├── PeakTimeResponse.java            # DTO returned by /deals/peak-time API
+│   └── GlobalExceptionHandler.java      # Centralised exception->HTTP response mapping
+├── service
+│   ├── DealService.java                 # Core business logic
+│   └── DealFilter.java                  # Reusable filtering helpers for deals
+├── domain
+│   ├── ChallengeData.java               # Representation of full JSON feed
+│   ├── Deal.java                        # Domain model used by the service layer
+│   └── Restaurant.java                  # Domain model used by the service layer
+├── persistence
+│   ├── CuisineEntity.java               # JPA entities persisted in the DB
+│   ├── DealEntity.java
+│   ├── RestaurantEntity.java
+│   └── SuburbEntity.java
+├── repository
+│   ├── CuisineRepository.java           # Spring Data JPA repositories
+│   ├── DealRepository.java
+│   ├── RestaurantRepository.java
+│   └── SuburbRepository.java
+├── loader
+│   └── DataLoader.java                  # Loads challengedata.json into the DB on startup
+└── config
+    └── WebClientConfig.java             # WebClient / infrastructure configuration
+```
+
+**src/main/resources:**
+
+```text
+resources
+├── application.yaml                     # Application + DB configuration
+├── static/                              # (reserved for static assets – unused)
+└── templates/                           # (reserved for server-side views – unused)
+```
+
+**src/test/java/au/com/eatclub/challenge:**
+```text
+challenge
+└── api
+    └── DealControllerTest.java          # Web layer tests (MockMvc)
+└── service
+    ├── DealFilterTest.java              # Unit tests for filtering helpers
+    ├── DealServicePeakTimeTest.java     # Unit tests for peak time calculation
+    └── DealServiceTest.java             # Unit tests for deal retrieval / filtering
+```
+
+### Layer responsibilities
+
+#### API layer (api)
+- Exposes the main HTTP endpoints, for example:
+  - `GET /api/deals` – list deals, optionally filtered by time and other criteria.
+  - `GET /api/deals/peak-time` – returns the peak time window during which most deals are available.
+- Converts incoming HTTP parameters into service method calls.
+- Maps internal domain objects into DTOs (`DealResponse`, `PeakTimeResponse`).
+- Uses `GlobalExceptionHandler` (`@RestControllerAdvice`) to convert domain / validation errors into
+consistent JSON error responses.
+
+#### Service layer (service)
+- Contains all business logic:
+  - retrieving deals from the repositories,
+  - applying filters (time window, restaurant, cuisine, etc),
+  - computing the peak time window across all deals.
+- `DealService` is the main entry point, called by the controller.
+- `DealFilter` encapsulates common filtering rules so they are testable in isolation and reusable.
+
+#### Domain layer (domain)
+- Provides pure domain models used by the service layer (Deal, Restaurant, ChallengeData).
+- These classes represent the business concepts without persistence annotations.
+- Helps keep the service logic decoupled from database implementation details.
+
+#### Persistence layer (persistence, repository)
+- `Entity` classes define the relational model:
+  - `RestaurantEntity ↔ DealEntity ↔ CuisineEntity ↔ SuburbEntity.`
+- `Repository` interfaces extend Spring Data JPA to provide CRUD and query methods.
+- The database is configured in `application.yaml` (H2 in-memory during development).
+
+#### Infrastructure / bootstrapping (config, loader)
+- `WebClientConfig` defines reusable HTTP clients for external calls (e.g. the JSON challenge feed).
+- `DataLoader` runs at startup, fetches `challengedata.json`, converts it to domain / entities, and
+persists it through the repositories so the API can query local data instead of hitting the remote
+JSON on every request.
+
+**Request flow**
+
+```text
+Client
+  ↓ HTTP (JSON)
+DealController (api)
+  ↓
+DealService (service)
+  ↓
+Repositories (repository)
+  ↓
+Database (persistence entities)
+```
+
+For the **peak time** endpoint:
+
+```text
+GET /api/deals/peak-time
+  → DealController
+  → DealService.calculatePeakTime()
+      - loads all deals for the configured time range
+      - computes the time window where the highest number of deals overlap
+      - returns a PeakTimeResponse (start, end, count)
+```
+
+#### Testing strategy
+- **Service tests** (`DealServiceTest`, `DealServicePeakTimeTest`, `DealFilterTest`) validate:
+  - core business rules,
+  - filtering behaviour,
+  - correctness of the peak time algorithm.
+- **Controller tests** (`DealControllerTest`) use Spring MVC test support (`MockMvc/WebTestClient`) to:
+  - validate HTTP status codes,
+  - JSON shape of responses, 
+  - error handling contracts.
+
+This structure keeps HTTP concerns, business rules, and persistence clearly separated while
+remaining small and easy to understand for the purposes of the coding challenge.
 
 ---
 
@@ -128,7 +272,7 @@ Both stored as `LocalTime`.
 - `qtyLeft` → `int`
 
 
-## 4. Time Parsing Rules
+# 4. Time Parsing Rules
 
 The system accepts both input formats:
 
@@ -155,14 +299,14 @@ Parser handles:
 
 
 
-## 5. Data Loading Process
+# 5. Data Loading Process
 1. Fetch JSON from: https://eccdn.com.au/misc/challengedata.json
 2.	Convert raw JSON into DTO objects
 3.	Normalise times using TimeParser & DealTimeNormalizer
 4.	Insert into H2 database
 5.	Expose via repository layer
 
-## 6. Task 1 — Active Deals API
+# 6. Task 1 — Active Deals API
 
 **Endpoint**
 
@@ -214,7 +358,7 @@ AND
 AND qtyLeft > 0
 ```
 
-## 7. Task 2 — Peak Time Window API
+# 7. Task 2 — Peak Time Window API
 
 **Endpoint**
 
@@ -245,7 +389,7 @@ The peak time window is the **continuous** time interval during which the maximu
 This is fully deterministic and reproducible.
 
 
-## 8. Task 3 — Database Schema Design (H2)
+# 8. Task 3 — Database Schema Design (H2)
 
 **Chosen Database: H2**
 
@@ -302,7 +446,7 @@ CREATE TABLE deal (
 );
 ```
 
-## 9. Testing Strategy (TDD)
+# 9. Testing Strategy (TDD)
 
 **Unit Tests**
 - `TimeParserTest`
@@ -322,7 +466,7 @@ CREATE TABLE deal (
 4.	Repeat
 
 
-## 10. Build & Run
+# 10. Build & Run
 ``` shell
 mvn clean install
 mvn spring-boot:run
@@ -333,7 +477,7 @@ H2 Console
 http://localhost:8080/h2-console
 ```
 
-## 11. Future Enhancements
+# 11. Future Enhancements
 - Pagination
 - Filtering by suburb or cuisine
 - Caching peak time window
