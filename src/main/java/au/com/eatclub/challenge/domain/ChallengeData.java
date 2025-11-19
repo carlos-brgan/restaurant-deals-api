@@ -7,7 +7,4 @@ import java.util.List;
  *
  * @param restaurants A list of restaurants associated with the challenge.
  */
-public record ChallengeData(
-        List<Restaurant> restaurants
-) {
-}
+public record ChallengeData(List<Restaurant> restaurants) { }

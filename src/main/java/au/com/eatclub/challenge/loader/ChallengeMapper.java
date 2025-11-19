@@ -64,15 +64,19 @@ public class ChallengeMapper {
      */
     public static Deal toDeal(DealDTO dto, LocalTime restaurantOpen, LocalTime restaurantClose) {
 
-        // Determine the start time of the deal
-        LocalTime start = dto.startRaw() != null ? TimeParser.parse(dto.startRaw())
-                : dto.openRaw() != null ? TimeParser.parse(dto.openRaw())
-                : restaurantOpen;
+        // Resolve the start time of the deal
+        LocalTime start = resolveTime(
+                dto.startRaw(),
+                dto.openRaw(),
+                restaurantOpen
+        );
 
-        // Determine the end time of the deal
-        LocalTime end = dto.endRaw() != null ? TimeParser.parse(dto.endRaw())
-                : dto.closeRaw() != null ? TimeParser.parse(dto.closeRaw())
-                : restaurantClose;
+        // Resolve the end time of the deal
+        LocalTime end = resolveTime(
+                dto.endRaw(),
+                dto.closeRaw(),
+                restaurantClose
+        );
 
         // Create and return a Deal object
         return new Deal(
@@ -104,5 +108,44 @@ public class ChallengeMapper {
      */
     private static boolean safeBool(String s) {
         return s != null && Boolean.parseBoolean(s);
+    }
+
+    /**
+     * Resolves a time value by attempting to parse the primary raw time,
+     * then the secondary raw time, and finally falling back to a default value.
+     *
+     * @param primaryRaw the primary raw time string
+     * @param secondaryRaw the secondary raw time string
+     * @param fallback the fallback LocalTime value
+     * @return the resolved LocalTime value
+     */
+    private static LocalTime resolveTime(String primaryRaw, String secondaryRaw, LocalTime fallback) {
+        // Try primary (e.g. start / end)
+        LocalTime t = parseIfPresent(primaryRaw);
+        if (t != null) {
+            return t;
+        }
+
+        // Try secondary (e.g. open / close)
+        t = parseIfPresent(secondaryRaw);
+        if (t != null) {
+            return t;
+        }
+
+        // Fallback to restaurant open/close
+        return fallback;
+    }
+
+    /**
+     * Parses a raw time string into a LocalTime object if the string is not null or blank.
+     *
+     * @param raw the raw time string to parse
+     * @return the parsed LocalTime object, or null if the string is null or blank
+     */
+    private static LocalTime parseIfPresent(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        return TimeParser.parse(raw); // your existing parser
     }
 }

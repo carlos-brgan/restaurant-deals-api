@@ -4,23 +4,18 @@ package au.com.eatclub.challenge.domain;
         import java.util.List;
 
         /**
-         * Immutable domain record that represents a restaurant.
+         * Represents a Restaurant entity with various attributes such as name, address,
+         * operating hours, cuisines, and deals.
          *
-         * <p>This record captures identifying information, address details, daily opening hours,
-         * the suburb/location, a list of cuisine types and any active deals for the restaurant.
-         *
-         * <p>Instances are immutable and intended for use as simple data carriers within the
-         * application domain.
-         *
-         * @param objectId   The unique identifier of the restaurant.
-         * @param name       The restaurant's display name.
-         * @param address1   The primary street address.
-         * @param imageLink  An optional link to an image for the restaurant.
-         * @param openTime   The daily opening time.
-         * @param closeTime  The daily closing time.
-         * @param suburb     The suburb or city where the restaurant is located.
-         * @param cuisines   A list of cuisine categories the restaurant belongs to.
-         * @param deals      A list of deals offered by the restaurant.
+         * @param objectId  Unique identifier for the restaurant.
+         * @param name      Name of the restaurant.
+         * @param address1  Address of the restaurant.
+         * @param imageLink URL link to the restaurant's image.
+         * @param openTime  Opening time of the restaurant.
+         * @param closeTime Closing time of the restaurant.
+         * @param suburb    Suburb where the restaurant is located.
+         * @param cuisines  List of cuisines offered by the restaurant.
+         * @param deals     List of deals available at the restaurant.
          */
         public record Restaurant(
                 String objectId,
