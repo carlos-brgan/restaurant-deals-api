@@ -56,21 +56,21 @@ class DataLoaderTest {
     void test_loadSingleRestaurant() {
 
         String json = """
-            {
-              "restaurants": [
                 {
-                  "objectId": "R1",
-                  "name": "Masala Kitchen",
-                  "address1": "55 Walsh Street",
-                  "suburb": "Lower East",
-                  "open": "3:00pm",
-                  "close": "9:00pm",
-                  "cuisines": ["Indian"],
-                  "deals": []
+                  "restaurants": [
+                    {
+                      "objectId": "R1",
+                      "name": "Masala Kitchen",
+                      "address1": "55 Walsh Street",
+                      "suburb": "Lower East",
+                      "open": "3:00pm",
+                      "close": "9:00pm",
+                      "cuisines": ["Indian"],
+                      "deals": []
+                    }
+                  ]
                 }
-              ]
-            }
-            """;
+                """;
 
         DataLoader loader = loaderWithJson(json);
         ChallengeData data = loader.load();
@@ -98,31 +98,31 @@ class DataLoaderTest {
     void test_dealExplicitStartEnd() {
 
         String json = """
-            {
-              "restaurants": [
                 {
-                  "objectId": "RX",
-                  "name": "Example",
-                  "address1": "123",
-                  "suburb": "Melbourne",
-                  "open": "4:00pm",
-                  "close": "10:00pm",
-                  "cuisines": [],
-                  "deals": [
+                  "restaurants": [
                     {
-                      "objectId": "D1",
-                      "discount": "50",
-                      "dineIn": "true",
-                      "lightning": "false",
-                      "qtyLeft": "5",
-                      "start": "5:00pm",
-                      "end": "9:00pm"
+                      "objectId": "RX",
+                      "name": "Example",
+                      "address1": "123",
+                      "suburb": "Melbourne",
+                      "open": "4:00pm",
+                      "close": "10:00pm",
+                      "cuisines": [],
+                      "deals": [
+                        {
+                          "objectId": "D1",
+                          "discount": "50",
+                          "dineIn": "true",
+                          "lightning": "false",
+                          "qtyLeft": "5",
+                          "start": "5:00pm",
+                          "end": "9:00pm"
+                        }
+                      ]
                     }
                   ]
                 }
-              ]
-            }
-            """;
+                """;
 
         DataLoader loader = loaderWithJson(json);
         ChallengeData data = loader.load();
@@ -151,29 +151,29 @@ class DataLoaderTest {
     void test_dealFallbackStartEnd() {
 
         String json = """
-            {
-              "restaurants": [
                 {
-                  "objectId": "RX",
-                  "name": "Example",
-                  "address1": "123",
-                  "suburb": "Melbourne",
-                  "open": "4:00pm",
-                  "close": "10:00pm",
-                  "cuisines": [],
-                  "deals": [
+                  "restaurants": [
                     {
-                      "objectId": "D2",
-                      "discount": "20",
-                      "dineIn": "false",
-                      "lightning": "true",
-                      "qtyLeft": "3"
+                      "objectId": "RX",
+                      "name": "Example",
+                      "address1": "123",
+                      "suburb": "Melbourne",
+                      "open": "4:00pm",
+                      "close": "10:00pm",
+                      "cuisines": [],
+                      "deals": [
+                        {
+                          "objectId": "D2",
+                          "discount": "20",
+                          "dineIn": "false",
+                          "lightning": "true",
+                          "qtyLeft": "3"
+                        }
+                      ]
                     }
                   ]
                 }
-              ]
-            }
-            """;
+                """;
 
         DataLoader loader = loaderWithJson(json);
         ChallengeData data = loader.load();
@@ -202,31 +202,31 @@ class DataLoaderTest {
     void test_dealOpenCloseFallback() {
 
         String json = """
-            {
-              "restaurants": [
                 {
-                  "objectId": "RX",
-                  "name": "Example",
-                  "address1": "123",
-                  "suburb": "Melbourne",
-                  "open": "4:00pm",
-                  "close": "10:00pm",
-                  "cuisines": [],
-                  "deals": [
+                  "restaurants": [
                     {
-                      "objectId": "D3",
-                      "discount": "10",
-                      "dineIn": "false",
-                      "lightning": "false",
-                      "qtyLeft": "2",
-                      "open": "6:00pm",
-                      "close": "8:00pm"
+                      "objectId": "RX",
+                      "name": "Example",
+                      "address1": "123",
+                      "suburb": "Melbourne",
+                      "open": "4:00pm",
+                      "close": "10:00pm",
+                      "cuisines": [],
+                      "deals": [
+                        {
+                          "objectId": "D3",
+                          "discount": "10",
+                          "dineIn": "false",
+                          "lightning": "false",
+                          "qtyLeft": "2",
+                          "open": "6:00pm",
+                          "close": "8:00pm"
+                        }
+                      ]
                     }
                   ]
                 }
-              ]
-            }
-            """;
+                """;
 
         DataLoader loader = loaderWithJson(json);
         ChallengeData data = loader.load();
@@ -249,19 +249,19 @@ class DataLoaderTest {
     void test_missingRestaurantOpenClose() {
 
         String json = """
-            {
-              "restaurants": [
                 {
-                  "objectId": "R1",
-                  "name": "Missing Fields Test",
-                  "address1": "Unknown",
-                  "suburb": "Nowhere",
-                  "cuisines": [],
-                  "deals": []
+                  "restaurants": [
+                    {
+                      "objectId": "R1",
+                      "name": "Missing Fields Test",
+                      "address1": "Unknown",
+                      "suburb": "Nowhere",
+                      "cuisines": [],
+                      "deals": []
+                    }
+                  ]
                 }
-              ]
-            }
-            """;
+                """;
 
         DataLoader loader = loaderWithJson(json);
         ChallengeData data = loader.load();
@@ -283,13 +283,13 @@ class DataLoaderTest {
     void test_multipleRestaurants() {
 
         String json = """
-            {
-              "restaurants": [
-                { "objectId": "R1", "name": "A", "address1": "1", "suburb": "X", "open": "1:00pm", "close": "5:00pm", "cuisines": [], "deals": [] },
-                { "objectId": "R2", "name": "B", "address1": "2", "suburb": "Y", "open": "2:00pm", "close": "6:00pm", "cuisines": [], "deals": [] }
-              ]
-            }
-            """;
+                {
+                  "restaurants": [
+                    { "objectId": "R1", "name": "A", "address1": "1", "suburb": "X", "open": "1:00pm", "close": "5:00pm", "cuisines": [], "deals": [] },
+                    { "objectId": "R2", "name": "B", "address1": "2", "suburb": "Y", "open": "2:00pm", "close": "6:00pm", "cuisines": [], "deals": [] }
+                  ]
+                }
+                """;
 
         DataLoader loader = loaderWithJson(json);
         ChallengeData data = loader.load();

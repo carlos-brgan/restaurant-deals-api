@@ -565,3 +565,5 @@ The final output is a simple JSON object:
 ```
 
 representing the time window during which deal activity is at its highest.
+
+### Database console http://localhost:8080/h2-console/
