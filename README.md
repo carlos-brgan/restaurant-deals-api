@@ -483,3 +483,40 @@ http://localhost:8080/h2-console
 - Caching peak time window
 - Swagger/OpenAPI documentation
 - Dockerised deployment
+
+# 12. Code Coverage (JaCoCo)
+
+This project uses **JaCoCo** for measuring automated test coverage.
+
+**Generate coverage locally:**
+
+``` shell 
+mvn clean test
+mvn jacoco:report
+```
+
+HTML report output:
+
+```text
+target/site/jacoco/index.html
+```
+
+Open on macOS:
+
+``` shell
+open target/site/jacoco/index.html
+```
+
+# 13. GitHub CI Pipeline
+
+Continuous Integration runs automatically on every push and pull request to `main`.
+
+Pipeline URL:
+https://github.com/carlos-brgan/restaurant-deals-api/actions
+
+The workflow runs:
+- `mvn clean verify`
+- All unit + integration tests
+- JaCoCo test coverage
+- Uploads reports as artifacts
+
